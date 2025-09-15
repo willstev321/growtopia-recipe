@@ -1,0 +1,4 @@
+[
+    {"id": 1, "name": "Tree Seed", "recipe": "1x Dirt + 1x Water"},
+    {"id": 2, "name": "Watering Can", "recipe": "2x Iron + 1x Water"}
+]
