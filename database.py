@@ -38,3 +38,15 @@ def get_all_items():
     items = c.fetchall()
     conn.close()
     return items
+
+def get_recipe(item_name):
+    """Mendapatkan recipe untuk item tertentu (case-insensitive)"""
+    conn = sqlite3.connect('growtopia.db')
+    cursor = conn.cursor()
+    
+    # Gunakan LOWER() untuk pencarian case-insensitive
+    cursor.execute("SELECT recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = cursor.fetchone()
+    
+    conn.close()
+    return result[0] if result else None
