@@ -167,7 +167,7 @@ async def recipe(ctx, *, item_name: str):
                 )
                 
                 embed.add_field(
-                    name="📋 **Bahan-bahan Recipe**",
+                    name="📋 **seeds recipe**",
                     value=f"```yaml\n{recipe_text}```",
                     inline=False
                 )
@@ -374,3 +374,4 @@ if __name__ == "__main__":
 
     print("🚀 Starting bot...")
     bot.run(token)
+
