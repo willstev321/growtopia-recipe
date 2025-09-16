@@ -49,4 +49,10 @@ async def search(ctx, *, keyword: str):
         await ctx.send(f"❌ Tidak ada item yang cocok dengan '{keyword}'")
 
 # Jalankan bot
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+token = os.getenv("DISCORD_BOT_TOKEN")
+
+if not token:
+    print("❌ Token tidak ditemukan! Pastikan sudah set di Environment Variables server.")
+    exit(1)
+
+bot.run(token)
