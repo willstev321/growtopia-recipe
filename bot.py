@@ -152,49 +152,44 @@ async def check_items_update():
 @bot.command(name="recipe")
 async def recipe(ctx, *, item_name: str):
     try:
-        # Cari item dengan pencarian case-insensitive
         recipe_text = get_recipe(item_name)
-        
         if recipe_text:
-            # Dapatkan detail lengkap item
             item_details = get_item_details(item_name)
             if item_details:
-                # Buat embed dengan desain premium
                 embed = discord.Embed(
                     title=f"📦 RECIPE: {item_details['name'].upper()}",
                     description=f"**Tier:** {item_details.get('tier', 'N/A')} | **ID:** {item_details['id']}",
                     color=discord.Color.green()
                 )
                 
+                # Tambahkan thumbnail jika ada
+                if item_details.get('image_url'):
+                    embed.set_thumbnail(url=item_details['image_url'])
+                
                 embed.add_field(
-                    name="📋 **seeds recipe**",
+                    name="📋 **Recipe**",
                     value=f"```yaml\n{recipe_text}```",
                     inline=False
                 )
                 
                 embed.set_footer(text="Growtopia Recipe Bot • Info terkini")
-                
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(f"📦 Recipe untuk **{item_name}**:\n```{recipe_text}```")
         else:
-            # Berikan saran jika item tidak ditemukan
             suggestions = search_items(item_name)
             if suggestions:
-                # Buat embed untuk suggestions
                 embed = discord.Embed(
                     title="❌ Item Tidak Ditemukan",
                     description=f"Tidak ditemukan recipe untuk **{item_name}**",
                     color=discord.Color.orange()
                 )
-                
                 suggestion_list = "\n".join([f"• {name}" for _, name in suggestions[:5]])
                 embed.add_field(
                     name="💡 **Mungkin maksud Anda:**",
                     value=suggestion_list,
                     inline=False
                 )
-                
                 await ctx.send(embed=embed)
             else:
                 embed = discord.Embed(
@@ -204,7 +199,6 @@ async def recipe(ctx, *, item_name: str):
                 )
                 await ctx.send(embed=embed)
     except Exception as e:
-        # Embed untuk error
         embed = discord.Embed(
             title="⚠️ Error",
             description=f"Terjadi kesalahan saat memproses permintaan: {str(e)}",
@@ -374,4 +368,5 @@ if __name__ == "__main__":
 
     print("🚀 Starting bot...")
     bot.run(token)
+
 
