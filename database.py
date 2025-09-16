@@ -135,8 +135,30 @@ def check_database():
     finally:
         conn.close()
 
+def get_item_details(item_name):
+    """Dapatkan detail lengkap item termasuk image_url"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT id, name, tier, recipe, image_url FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    
+    if result:
+        return {
+            'id': result[0],
+            'name': result[1],
+            'tier': result[2],
+            'recipe': result[3],
+            'image_url': result[4]
+        }
+    return None
+
 if __name__ == "__main__":
     # Inisialisasi database terlebih dahulu
     if init_db():
         normalize_item_names()
         check_database()
+
