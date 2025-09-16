@@ -159,9 +159,6 @@ async def recipe(ctx, *, item_name: str):
             # Dapatkan detail lengkap item
             item_details = get_item_details(item_name)
             if item_details:
-                # Format recipe dengan gambar
-                formatted_recipe = format_recipe_with_images(recipe_text)
-                
                 # Buat embed dengan desain premium
                 embed = discord.Embed(
                     title=f"📦 RECIPE: {item_details['name'].upper()}",
@@ -169,13 +166,9 @@ async def recipe(ctx, *, item_name: str):
                     color=discord.Color.green()
                 )
                 
-                # Tambahkan thumbnail item jika ada
-                if item_details.get('image_url'):
-                    embed.set_thumbnail(url=item_details['image_url'])
-                
                 embed.add_field(
-                    name="📋 **Recipe**",
-                    value=formatted_recipe,
+                    name="📋 **seeds recipe**",
+                    value=f"```yaml\n{recipe_text}```",
                     inline=False
                 )
                 
@@ -218,26 +211,6 @@ async def recipe(ctx, *, item_name: str):
             color=discord.Color.red()
         )
         await ctx.send(embed=embed)
-
-def format_recipe_with_images(recipe_text):
-    """Format recipe text dengan menambahkan gambar untuk setiap komponen"""
-    # Pisahkan komponen recipe
-    components = recipe_text.split(' + ')
-    formatted_components = []
-    
-    for component in components:
-        component = component.strip()
-        # Dapatkan URL gambar untuk komponen ini
-        image_url = get_item_image_url(component)
-        
-        if image_url:
-            # Format dengan gambar kecil
-            formatted_components.append(f"{component} [🖼️]({image_url})")
-        else:
-            formatted_components.append(component)
-    
-    # Gabungkan kembali komponen
-    return " + ".join(formatted_components)
 
 # Command cari item
 @bot.command(name="search")
@@ -401,6 +374,3 @@ if __name__ == "__main__":
 
     print("🚀 Starting bot...")
     bot.run(token)
-
-
-
