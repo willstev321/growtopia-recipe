@@ -1,9 +1,12 @@
 import discord
 from discord.ext import commands, tasks
 import os
+import threading
+import subprocess
+import time
 from dotenv import load_dotenv
 from database import init_db, get_recipe, get_all_items, get_item_details, search_items
-from items_parser import fetch_and_parse_items
+from items_parser import fetch_and_parse_items, load_all_items
 
 # Load environment variables dari file .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -12,20 +15,49 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="?", intents=intents)
 
-# Inisialisasi DB
-init_db()
+def run_item_parser_periodically():
+    """Jalankan item_parser.py secara periodic setiap 24 jam"""
+    while True:
+        try:
+            print("🔄 Menjalankan item_parser.py...")
+            # Gunakan subprocess untuk menjalankan script terpisah
+            result = subprocess.run(["python", "item_parser.py"], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✅ item_parser.py berhasil dijalankan")
+                if result.stdout:
+                    print(f"Output: {result.stdout}")
+            else:
+                print(f"❌ Error menjalankan item_parser.py: {result.stderr}")
+                
+        except Exception as e:
+            print(f"❌ Exception dalam run_item_parser_periodically: {e}")
+        
+        # Tunggu 24 jam sebelum menjalankan lagi
+        time.sleep(86400)
+
+def initialize_database():
+    """Jalankan inisialisasi database"""
+    try:
+        print("🔄 Menginisialisasi database...")
+        # Inisialisasi DB
+        init_db()
+        
+        # Load items ke database jika belum ada
+        if len(get_all_items()) == 0:
+            print("🔄 Loading items to database...")
+            load_all_items()
+            
+        print("✅ Database berhasil diinisialisasi")
+    except Exception as e:
+        print(f"❌ Error dalam initialize_database: {e}")
 
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
     print(f"🆔 Bot ID: {bot.user.id}")
     print(f"👥 Connected to {len(bot.guilds)} guild(s)")
-    
-    # Load items ke database jika belum ada
-    from items_parser import load_all_items
-    if len(get_all_items()) == 0:
-        print("🔄 Loading items to database...")
-        load_all_items()
     
     check_items_update.start()
 
@@ -153,7 +185,7 @@ async def help_command(ctx):
         inline=False
     )
     
-    embed.set_footer(text="Bot Growtopia Recipe • https://github.com/your-repo")
+    embed.set_footer(text="Bot Growtopia Recipe")
     
     await ctx.send(embed=embed)
 
@@ -169,6 +201,14 @@ async def on_command_error(ctx, error):
 
 # Jalankan bot
 if __name__ == "__main__":
+    # Inisialisasi database pertama
+    initialize_database()
+    
+    # Jalankan item_parser di thread terpisah (akan berjalan setiap 24 jam)
+    parser_thread = threading.Thread(target=run_item_parser_periodically, daemon=True)
+    parser_thread.start()
+    print("✅ Item parser thread started")
+    
     token = os.getenv("DISCORD_BOT_TOKEN")
 
     if not token:
