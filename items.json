@@ -2196,12 +2196,14 @@
 "recipe": "Slot Machine + Treasure Chest"
 },
 {
-"id": 367,
-"name": "Green Blouse",
-"tier": 6,
-"recipe": "Bush + Green Block"
+  "id": 367,
+  "name": "Green Blouse",
+  "tier": 6,
+  "recipe": "Bush + Green Block",
+  "image_url": "https://static.wikia.nocookie.net/growtopia/images/8/8f/ItemSprites.png/revision/latest/window-crop/width/32/x-offset/1344/y-offset/0/window-width/32/window-height/32?format=webp&fill=cb-20250911134641"
 }
 ]
+
 
 
 
