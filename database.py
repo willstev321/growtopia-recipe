@@ -108,3 +108,25 @@ def get_item_image_url(item_name):
     
     conn.close()
     return result[0] if result else None
+
+def save_item(item_id, name, tier, recipe, image_url=None):
+    """Simpan item ke database"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cek apakah item sudah ada
+    c.execute("SELECT id FROM items WHERE id = ?", (item_id,))
+    exists = c.fetchone()
+    
+    if exists:
+        # Update item yang sudah ada
+        c.execute("UPDATE items SET name = ?, tier = ?, recipe = ?, image_url = ? WHERE id = ?",
+                  (name, tier, recipe, image_url, item_id))
+    else:
+        # Insert item baru
+        c.execute("INSERT INTO items (id, name, tier, recipe, image_url) VALUES (?, ?, ?, ?, ?)",
+                  (item_id, name, tier, recipe, image_url))
+    
+    conn.commit()
+    conn.close()
+
