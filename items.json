@@ -32,7 +32,7 @@
 {
 "id": 6,
 "name": "Lava Rock",
-"t极": 2,
+"tier": 2,
 "recipe": "Lava + Cave Background"
 },
 {
@@ -126,7 +126,7 @@
 "recipe": "Sign + Lava"
 },
 {
-"极": 22,
+"id": 22,
 "name": "Wheat",
 "tier": 3,
 "recipe": "Grass + Sand"
@@ -195,7 +195,7 @@
 "id": 33,
 "name": "Aqua Block",
 "tier": 4,
-"极": "Bricks + Glass Pane"
+"recipe": "Bricks + Glass Pane"
 },
 {
 "id": 34,
@@ -205,7 +205,7 @@
 },
 {
 "id": 35,
-"极": "Poppy",
+"name": "Poppy",
 "tier": 4,
 "recipe": "Rose + Daisy"
 },
@@ -213,7 +213,7 @@
 "id": 36,
 "name": "Flowery Wallpaper",
 "tier": 4,
-"recipe": "极 + Daisy"
+"recipe": "Wooden Background + Daisy"
 },
 {
 "id": 37,
@@ -556,12 +556,6 @@
 "name": "Patent Leather Shoes",
 "tier": 6,
 "recipe": "Brick Background + Grey Block"
-},
-{
-"id": 93,
-"name": "Green Blouse",
-"tier": 6,
-"recipe": "Bush + Green Block"
 },
 {
 "id": 94,
@@ -2200,8 +2194,15 @@
 "name": "Holiday Gift Box",
 "tier": 0,
 "recipe": "Slot Machine + Treasure Chest"
+},
+{
+"id": 367,
+"name": "Green Blouse",
+"tier": 6,
+"recipe": "Bush + Green Block"
 }
 ]
+
 
 
 
