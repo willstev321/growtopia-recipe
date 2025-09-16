@@ -16,10 +16,16 @@ intents.message_content = True
 
 # Nonaktifkan help command bawaan agar bisa menggunakan custom help
 bot = commands.Bot(
-    command_prefix="*",  # DIUBAH: gunakan * sebagai prefix
+    command_prefix="*", 
     intents=intents,
     help_command=None
 )
+
+# Daftar channel yang diizinkan (whitelist)
+ALLOWED_CHANNELS = [
+    1417382043527942204,  # Channel ID dari link Discord Anda
+    # Tambahkan channel ID lain jika diperlukan
+]
 
 def run_item_parser_periodically():
     """Jalankan item_parser.py secara periodic setiap 24 jam"""
@@ -59,13 +65,29 @@ def initialize_database():
     except Exception as e:
         print(f"❌ Error dalam initialize_database: {e}")
 
+def is_channel_allowed(channel_id):
+    """Cek apakah channel diizinkan untuk menggunakan bot"""
+    return channel_id in ALLOWED_CHANNELS
+
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
     print(f"🆔 Bot ID: {bot.user.id}")
     print(f"👥 Connected to {len(bot.guilds)} guild(s)")
     
+    # Tampilkan channel yang diizinkan
+    print(f"📋 Channel yang diizinkan: {ALLOWED_CHANNELS}")
+    
     check_items_update.start()
+
+@bot.check
+async def channel_check(ctx):
+    """Global check untuk memverifikasi bahwa command dieksekusi di channel yang diizinkan"""
+    if not is_channel_allowed(ctx.channel.id):
+        # Kirim pesan error hanya di channel yang tidak diizinkan
+        await ctx.send("❌ Bot ini hanya dapat digunakan di channel tertentu. Silakan kunjungi channel yang ditentukan.")
+        return False
+    return True
 
 # Background task untuk cek item baru
 @tasks.loop(hours=24)
@@ -75,17 +97,16 @@ async def check_items_update():
         if new_items:
             print(f"🆕 {len(new_items)} item baru ditemukan!")
             for guild in bot.guilds:
-                channel = discord.utils.get(
-                    guild.text_channels, name="growtopia-news"
-                )
-                if channel:
-                    for item in new_items:
-                        await channel.send(
-                            f"🆕 **Item Baru!**\n"
-                            f"**{item['name']}** (Tier {item.get('tier', 'N/A')})\n"
-                            f"📋 Recipe: {item.get('recipe','Tidak ada recipe')}"
-                        )
-                    break
+                # Cari channel yang diizinkan
+                for allowed_channel_id in ALLOWED_CHANNELS:
+                    channel = bot.get_channel(allowed_channel_id)
+                    if channel:
+                        for item in new_items:
+                            await channel.send(
+                                f"🆕 **Item Baru!**\n"
+                                f"**{item['name']}** (Tier {item.get('tier', 'N/A')})\n"
+                                f"📋 Recipe: {item.get('recipe','Tidak ada recipe')}"
+                            )
     except Exception as e:
         print(f"❌ Error in check_items_update: {e}")
 
@@ -181,13 +202,20 @@ async def help_command(ctx):
     
     embed.add_field(
         name="🔍 Pencarian Item",
-        value="• `*recipe [nama_item]` - Cari recipe item\n• `*search [keyword]` - Cari item berdasarkan keyword\n• `*iteminfo [nama_item]` - Info lengkap tentang item",  # DIUBAH: * sebagai prefix
+        value="• `*recipe [nama_item]` - Cari recipe item\n• `*search [keyword]` - Cari item berdasarkan keyword\n• `*iteminfo [nama_item]` - Info lengkap tentang item",
         inline=False
     )
     
     embed.add_field(
         name="💡 Tips",
         value="• Gunakan huruf besar/kecil bebas, bot akan tetap memahami\n• Bot mendukung pencarian partial (sebagian nama item)",
+        inline=False
+    )
+    
+    # Tambahkan informasi channel khusus
+    embed.add_field(
+        name="📍 Channel Khusus",
+        value=f"Bot ini hanya dapat digunakan di channel <#{ALLOWED_CHANNELS[0]}>",
         inline=False
     )
     
@@ -200,8 +228,12 @@ async def help_command(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(
-            "❌ Command tidak ditemukan. Gunakan `*help` untuk melihat daftar command yang tersedia."  # DIUBAH: * sebagai prefix
+            "❌ Command tidak ditemukan. Gunakan `*help` untuk melihat daftar command yang tersedia."
         )
+    elif isinstance(error, commands.CheckFailure):
+        # Jangan kirim pesan error untuk channel yang tidak diizinkan
+        # karena sudah dikirim di channel_check
+        pass
     else:
         await ctx.send(f"❌ Terjadi error: {error}")
 
