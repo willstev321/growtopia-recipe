@@ -1,256 +1,256 @@
 [
-    {
-        "id": 1,
-        "name": "Door",
-        "tier": 2,
-        "recipe": "Dirt + Cave Background"
-    },
-    {
-        "id": 2,
-        "name": "Grass",
-        "tier": 2,
-        "recipe": "Dirt + Rock"
-    },
-    {
-        "id": 3,
-        "name": "Wood Block",
-        "tier": 2,
-        "recipe": "Dirt + Lava"
-    },
-    {
-        "id": 4,
-        "name": "Glass Pane",
-        "tier": 2,
-        "recipe": "Rock + Lava"
-    },
-    {
-        "id": 5,
-        "name": "Sign",
-        "tier": 2,
-        "recipe": "Cave Background + Rock"
-    },
-    {
-        "id": 6,
-        "name": "Lava Rock",
-        "tier": 2,
-        "recipe": "Lava + Cave Background"
-    },
-    {
-        "id": 7,
-        "name": "Martian Tree",
-        "tier": 2,
-        "recipe": "Martian Soil + Mars Rock"
-    },
-    {
-        "id": 8,
-        "name": "Wooden Background",
-        "tier": 3,
-        "recipe": "Grass + Door"
-    },
-    {
-        "id": 9,
-        "name": "Pointy Sign",
-        "tier": 3,
-        "recipe": "Door + Sign"
-    },
-    {
-        "id": 10,
-        "name": "Crappy Sign",
-        "tier": 3,
-        "recipe": "Door + Dirt"
-    },
-    {
-        "id": 11,
-        "name": "Daisy",
-        "tier": 3,
-        "recipe": "Grass + Dirt"
-    },
-    {
-        "id": 12,
-        "name": "Wooden Platform",
-        "tier": 3,
-        "recipe": "Wood Block + Grass"
-    },
-    {
-        "id": 13,
-        "name": "Rock Background",
-        "tier": 3,
-        "recipe": "Rock + Door"
-    },
-    {
-        "id": 14,
-        "name": "Bricks",
-        "tier": 3,
-        "recipe": "Rock + Grass"
-    },
-    {
-        "id": 15,
-        "name": "Rose",
-        "tier": 3,
-        "recipe": "Grass + Lava"
-    },
-    {
-        "id": 16,
-        "name": "Super Crate Box",
-        "tier": 3,
-        "recipe": "Dirt + Sign"
-    },
-    {
-        "id": 17,
-        "name": "Mushroom",
-        "tier": 3,
-        "recipe": "Cave Background + Grass"
-    },
-    {
-        "id": 18,
-        "name": "Cargo Shorts",
-        "tier": 3,
-        "recipe": "Dirt + Wood Block"
-    },
-    {
-        "id": 19,
-        "name": "Amber Glass",
-        "tier": 3,
-        "recipe": "Dirt + Glass Pane"
-    },
-    {
-        "id": 20,
-        "name": "Happy Joy Plaque",
-        "tier": 3,
-        "recipe": "Door + Cave Background"
-    },
-    {
-        "id": 21,
-        "name": "Torch",
-        "tier": 3,
-        "recipe": "Sign + Lava"
-    },
-    {
-        "id": 22,
-        "name": "Wheat",
-        "tier": 3,
-        "recipe": "Grass + Sand"
-    },
-    {
-        "id": 23,
-        "name": "Terracotta Pot",
-        "tier": 3,
-        "recipe": "Martian Tree + Martian Soil"
-    },
-    {
-        "id": 24,
-        "name": "Danger Sign",
-        "tier": 4,
-        "recipe": "Lava + Pointy Sign"
-    },
-    {
-        "id": 25,
-        "name": "Window",
-        "tier": 4,
-        "recipe": "Glass Pane + Wooden Background"
-    },
-    {
-        "id": 26,
-        "name": "Shallot Mustache",
-        "tier": 4,
-        "recipe": "Mushroom + Grass"
-    },
-    {
-        "id": 27,
-        "name": "Grey Block",
-        "tier": 4,
-        "recipe": "Bricks + Rock"
-    },
-    {
-        "id": 28,
-        "name": "Black Block",
-        "tier": 4,
-        "recipe": "Bricks + Cave Background"
-    },
-    {
-        "id": 29,
-        "name": "White Block",
-        "tier": 4,
-        "recipe": "Bricks + Mushroom"
-    },
-    {
-        "id": 30,
-        "name": "Red Block",
-        "tier": 4,
-        "recipe": "Bricks + Lava"
-    },
-    {
-        "id": 31,
-        "name": "Yellow Block",
-        "tier": 4,
-        "recipe": "Bricks + Daisy"
-    },
-    {
-        "id": 32,
-        "name": "Green Block",
-        "tier": 4,
-        "recipe": "Bricks + Grass"
-    },
-    {
-        "id": 33,
-        "name": "Aqua Block",
-        "tier": 4,
-        "recipe": "Bricks + Glass Pane"
-    },
-    {
-        "id": 34,
-        "name": "Brown Block",
-        "tier": 4,
-        "recipe": "Bricks + Dirt"
-    },
-    {
-        "id": 35,
-        "name": "Poppy",
-        "tier": 4,
-        "recipe": "Rose + Daisy"
-    },
-    {
-        "id": 36,
-        "name": "Flowery Wallpaper",
-        "tier": 4,
-        "recipe": "Wooden Background + Daisy"
-    },
-    {
-        "id": 37,
-        "name": "Wooden Table",
-        "tier": 4,
-        "recipe": "Wooden Platform + Wood Block"
-    },
-    {
-        "id": 38,
-        "name": "Messy Brown Hair",
-        "tier": 4,
-        "recipe": "Crappy Sign + Grass"
-    },
-    {
-        "id": 39,
-        "name": "Mud Glob",
-        "tier": 4,
-        "recipe": "Daisy + Dirt"
-    },
-    {
-        "id": 40,
-        "name": "Stinky Sock",
-        "tier": 4,
-        "recipe": "Mushroom + Dirt"
-    },
-    {
-        "id": 41,
-        "name": "Tan Shirt",
-        "tier": 4,
-        "recipe": "Rock Background + Dirt"
-    },
-    {
-        "id": 42,
-        "name": "Cliffside",
-        "tier": 4,
-        "recipe": "Rock Background + Boulder"
-    },
+{
+"id": 1,
+"name": "Door",
+"tier": 2,
+"recipe": "Dirt + Cave Background"
+},
+{
+"id": 2,
+"name": "Grass",
+"tier": 2,
+"recipe": "Dirt + Rock"
+},
+{
+"id": 3,
+"name": "Wood Block",
+"tier": 2,
+"recipe": "Dirt + Lava"
+},
+{
+"id": 4,
+"name": "Glass Pane",
+"tier": 2,
+"recipe": "Rock + Lava"
+},
+{
+"id": 5,
+"name": "Sign",
+"tier": 2,
+"recipe": "Cave Background + Rock"
+},
+{
+"id": 6,
+"name": "Lava Rock",
+"t极": 2,
+"recipe": "Lava + Cave Background"
+},
+{
+"id": 7,
+"name": "Martian Tree",
+"tier": 2,
+"recipe": "Martian Soil + Mars Rock"
+},
+{
+"id": 8,
+"name": "Wooden Background",
+"tier": 3,
+"recipe": "Grass + Door"
+},
+{
+"id": 9,
+"name": "Pointy Sign",
+"tier": 3,
+"recipe": "Door + Sign"
+},
+{
+"id": 10,
+"name": "Crappy Sign",
+"tier": 3,
+"recipe": "Door + Dirt"
+},
+{
+"id": 11,
+"name": "Daisy",
+"tier": 3,
+"recipe": "Grass + Dirt"
+},
+{
+"id": 12,
+"name": "Wooden Platform",
+"tier": 3,
+"recipe": "Wood Block + Grass"
+},
+{
+"id": 13,
+"name": "Rock Background",
+"tier": 3,
+"recipe": "Rock + Door"
+},
+{
+"id": 14,
+"name": "Bricks",
+"tier": 3,
+"recipe": "Rock + Grass"
+},
+{
+"id": 15,
+"name": "Rose",
+"tier": 3,
+"recipe": "Grass + Lava"
+},
+{
+"id": 16,
+"name": "Super Crate Box",
+"tier": 3,
+"recipe": "Dirt + Sign"
+},
+{
+"id": 17,
+"name": "Mushroom",
+"tier": 3,
+"recipe": "Cave Background + Grass"
+},
+{
+"id": 18,
+"name": "Cargo Shorts",
+"tier": 3,
+"recipe": "Dirt + Wood Block"
+},
+{
+"id": 19,
+"name": "Amber Glass",
+"tier": 3,
+"recipe": "Dirt + Glass Pane"
+},
+{
+"id": 20,
+"name": "Happy Joy Plaque",
+"tier": 3,
+"recipe": "Door + Cave Background"
+},
+{
+"id": 21,
+"name": "Torch",
+"tier": 3,
+"recipe": "Sign + Lava"
+},
+{
+"极": 22,
+"name": "Wheat",
+"tier": 3,
+"recipe": "Grass + Sand"
+},
+{
+"id": 23,
+"name": "Terracotta Pot",
+"tier": 3,
+"recipe": "Martian Tree + Martian Soil"
+},
+{
+"id": 24,
+"name": "Danger Sign",
+"tier": 4,
+"recipe": "Lava + Pointy Sign"
+},
+{
+"id": 25,
+"name": "Window",
+"tier": 4,
+"recipe": "Glass Pane + Wooden Background"
+},
+{
+"id": 26,
+"name": "Shallot Mustache",
+"tier": 4,
+"recipe": "Mushroom + Grass"
+},
+{
+"id": 27,
+"name": "Grey Block",
+"tier": 4,
+"recipe": "Bricks + Rock"
+},
+{
+"id": 28,
+"name": "Black Block",
+"tier": 4,
+"recipe": "Bricks + Cave Background"
+},
+{
+"id": 29,
+"name": "White Block",
+"tier": 4,
+"recipe": "Bricks + Mushroom"
+},
+{
+"id": 30,
+"name": "Red Block",
+"tier": 4,
+"recipe": "Bricks + Lava"
+},
+{
+"id": 31,
+"name": "Yellow Block",
+"tier": 4,
+"recipe": "Bricks + Daisy"
+},
+{
+"id": 32,
+"name": "Green Block",
+"tier": 4,
+"recipe": "Bricks + Grass"
+},
+{
+"id": 33,
+"name": "Aqua Block",
+"tier": 4,
+"极": "Bricks + Glass Pane"
+},
+{
+"id": 34,
+"name": "Brown Block",
+"tier": 4,
+"recipe": "Bricks + Dirt"
+},
+{
+"id": 35,
+"极": "Poppy",
+"tier": 4,
+"recipe": "Rose + Daisy"
+},
+{
+"id": 36,
+"name": "Flowery Wallpaper",
+"tier": 4,
+"recipe": "极 + Daisy"
+},
+{
+"id": 37,
+"name": "Wooden Table",
+"tier": 4,
+"recipe": "Wooden Platform + Wood Block"
+},
+{
+"id": 38,
+"name": "Messy Brown Hair",
+"tier": 4,
+"recipe": "Crappy Sign + Grass"
+},
+{
+"id": 39,
+"name": "Mud Glob",
+"tier": 4,
+"recipe": "Daisy + Dirt"
+},
+{
+"id": 40,
+"name": "Stinky Sock",
+"tier": 4,
+"recipe": "Mushroom + Dirt"
+},
+{
+"id": 41,
+"name": "Tan Shirt",
+"tier": 4,
+"recipe": "Rock Background + Dirt"
+},
+{
+"id": 42,
+"name": "Cliffside",
+"tier": 4,
+"recipe": "Rock Background + Boulder"
+},
 {
 "id": 43,
 "name": "Dungeon Door",
@@ -2202,5 +2202,6 @@
 "recipe": "Slot Machine + Treasure Chest"
 }
 ]
+
 
 
