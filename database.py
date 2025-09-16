@@ -1,118 +1,110 @@
 import sqlite3
+import json
 import os
 
-DB_FILE = "growtopia_items.db"
-
 def init_db():
-    """Inisialisasi database dan buat tabel jika belum ada"""
-    conn = sqlite3.connect(DB_FILE)
+    """Inisialisasi database dengan tabel items"""
+    conn = sqlite3.connect('items.db')
     c = conn.cursor()
     
-    # Buat tabel items dengan kolom tier
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS items (
-        id INTEGER PRIMARY KEY,
-        name TEXT UNIQUE,
-        tier INTEGER,
-        recipe TEXT
-    )
-    """)
-    
-    # Buat index untuk pencarian case-insensitive
-    c.execute("CREATE INDEX IF NOT EXISTS idx_items_lower_name ON items(LOWER(name))")
+    # Buat tabel jika belum ada
+    c.execute('''CREATE TABLE IF NOT EXISTS items
+                 (id INTEGER PRIMARY KEY, 
+                  name TEXT, 
+                  tier INTEGER,
+                  recipe TEXT,
+                  image_url TEXT)''')
     
     conn.commit()
     conn.close()
-    print(f"✅ Database initialized at {DB_FILE}")
 
-def save_item(item_id, name, tier, recipe):
-    """Menyimpan item ke database"""
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
+def load_all_items():
+    """Load semua items dari items.json ke database"""
     try:
-        c.execute(
-            "INSERT OR REPLACE INTO items (id, name, tier, recipe) VALUES (?, ?, ?, ?)", 
-            (item_id, name, tier, recipe)
-        )
+        with open('items.json', 'r', encoding='utf-8') as f:
+            items = json.load(f)
+        
+        conn = sqlite3.connect('items.db')
+        c = conn.cursor()
+        
+        # Kosongkan tabel sebelum mengisi ulang
+        c.execute("DELETE FROM items")
+        
+        # Masukkan items ke database
+        for item in items:
+            c.execute("INSERT INTO items (id, name, tier, recipe, image_url) VALUES (?, ?, ?, ?, ?)",
+                     (item['id'], item['name'], item.get('tier', 0), item.get('recipe', ''), item.get('image_url', '')))
+        
         conn.commit()
-        return True
-    except sqlite3.Error as e:
-        print(f"❌ Error saving item {name}: {e}")
-        return False
-    finally:
         conn.close()
+        print(f"✅ {len(items)} items berhasil dimuat ke database")
+    except Exception as e:
+        print(f"❌ Error loading items: {e}")
 
 def get_recipe(item_name):
-    """Mendapatkan recipe untuk item tertentu (case-insensitive)"""
-    conn = sqlite3.connect(DB_FILE)
+    """Dapatkan recipe untuk item tertentu"""
+    conn = sqlite3.connect('items.db')
     c = conn.cursor()
     
-    try:
-        # Pencarian case-insensitive
-        c.execute("SELECT recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
-        result = c.fetchone()
-        
-        if not result:
-            # Coba partial match jika exact match tidak ditemukan
-            c.execute("SELECT recipe FROM items WHERE LOWER(name) LIKE LOWER(?)", (f"%{item_name}%",))
-            result = c.fetchone()
-        
-        return result[0] if result else None
-    except sqlite3.Error as e:
-        print(f"❌ Error getting recipe for {item_name}: {e}")
-        return None
-    finally:
-        conn.close()
-
-def get_all_items():
-    """Mendapatkan semua items dari database"""
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
     
-    try:
-        c.execute("SELECT id, name FROM items ORDER BY name")
-        items = c.fetchall()
-        return items
-    except sqlite3.Error as e:
-        print(f"❌ Error getting all items: {e}")
-        return []
-    finally:
-        conn.close()
+    conn.close()
+    return result[0] if result else None
 
 def get_item_details(item_name):
-    """Mendapatkan detail lengkap item (case-insensitive)"""
-    conn = sqlite3.connect(DB_FILE)
+    """Dapatkan detail lengkap item termasuk image_url"""
+    conn = sqlite3.connect('items.db')
     c = conn.cursor()
     
-    try:
-        c.execute("SELECT id, name, tier, recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
-        result = c.fetchone()
-        
-        if result:
-            return {
-                "id": result[0],
-                "name": result[1],
-                "tier": result[2],
-                "recipe": result[3]
-            }
-        return None
-    except sqlite3.Error as e:
-        print(f"❌ Error getting item details for {item_name}: {e}")
-        return None
-    finally:
-        conn.close()
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT id, name, tier, recipe, image_url FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    
+    if result:
+        return {
+            'id': result[0],
+            'name': result[1],
+            'tier': result[2],
+            'recipe': result[3],
+            'image_url': result[4]
+        }
+    return None
+
+def get_all_items():
+    """Dapatkan semua items dari database"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    c.execute("SELECT id, name FROM items")
+    items = c.fetchall()
+    
+    conn.close()
+    return items
 
 def search_items(keyword):
-    """Mencari item berdasarkan keyword (case-insensitive)"""
-    conn = sqlite3.connect(DB_FILE)
+    """Cari items berdasarkan keyword"""
+    conn = sqlite3.connect('items.db')
     c = conn.cursor()
     
-    try:
-        c.execute("SELECT id, name FROM items WHERE LOWER(name) LIKE LOWER(?) ORDER BY name", (f"%{keyword}%",))
-        items = c.fetchall()
-        return items
-    except sqlite3.Error as e:
-        print(f"❌ Error searching items: {e}")
-        return []
-    finally:
-        conn.close()
+    # Cari item dengan nama yang mengandung keyword (case-insensitive)
+    c.execute("SELECT id, name FROM items WHERE LOWER(name) LIKE LOWER(?)", ('%' + keyword + '%',))
+    items = c.fetchall()
+    
+    conn.close()
+    return items
+
+def get_item_image_url(item_name):
+    """Dapatkan URL gambar untuk item tertentu"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT image_url FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    return result[0] if result else None
