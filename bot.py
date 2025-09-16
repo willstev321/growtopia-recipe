@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands, tasks
 import os
 from dotenv import load_dotenv
+from database import init_db, get_recipe, get_all_items, get_item_details, search_items
 from items_parser import fetch_and_parse_items
-from database import init_db, get_recipe
 
 # Load environment variables dari file .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -15,14 +15,19 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 # Inisialisasi DB
 init_db()
 
-
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
     print(f"🆔 Bot ID: {bot.user.id}")
     print(f"👥 Connected to {len(bot.guilds)} guild(s)")
+    
+    # Load items ke database jika belum ada
+    from items_parser import load_all_items
+    if len(get_all_items()) == 0:
+        print("🔄 Loading items to database...")
+        load_all_items()
+    
     check_items_update.start()
-
 
 # Background task untuk cek item baru
 @tasks.loop(hours=24)
@@ -38,57 +43,129 @@ async def check_items_update():
                 if channel:
                     for item in new_items:
                         await channel.send(
-                            f"🆕 Item baru: **{item['name']}** (ID {item['id']})\n"
-                            f"Recipe: {item.get('recipe','Tidak ada')}"
+                            f"🆕 **Item Baru!**\n"
+                            f"**{item['name']}** (Tier {item.get('tier', 'N/A')})\n"
+                            f"📋 Recipe: {item.get('recipe','Tidak ada recipe')}"
                         )
                     break
     except Exception as e:
         print(f"❌ Error in check_items_update: {e}")
 
-
 # Command lihat recipe
 @bot.command(name="recipe")
 async def recipe(ctx, *, item_name: str):
     try:
+        # Cari item dengan pencarian case-insensitive
         recipe_text = get_recipe(item_name)
+        
         if recipe_text:
-            await ctx.send(f"📦 Recipe untuk **{item_name}**:\n{recipe_text}")
+            # Dapatkan detail lengkap item
+            item_details = get_item_details(item_name)
+            if item_details:
+                tier_info = f" (Tier {item_details['tier']})" if item_details.get('tier') else ""
+                await ctx.send(
+                    f"📦 **Recipe untuk {item_details['name']}{tier_info}:**\n"
+                    f"```{recipe_text}```\n"
+                    f"🆔 ID: {item_details['id']}"
+                )
+            else:
+                await ctx.send(f"📦 Recipe untuk **{item_name}**:\n```{recipe_text}```")
         else:
-            await ctx.send(f"❌ Tidak ada recipe untuk {item_name}")
+            # Berikan saran jika item tidak ditemukan
+            suggestions = search_items(item_name)
+            if suggestions:
+                suggestion_list = "\n".join([f"• {name}" for _, name in suggestions[:5]])
+                await ctx.send(
+                    f"❌ Tidak ditemukan recipe untuk **{item_name}**\n"
+                    f"💡 Mungkin maksud Anda:\n{suggestion_list}"
+                )
+            else:
+                await ctx.send(f"❌ Tidak ditemukan recipe untuk **{item_name}**")
     except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
-
+        await ctx.send(f"❌ Error: {str(e)}")
 
 # Command cari item
 @bot.command(name="search")
 async def search(ctx, *, keyword: str):
     try:
-        from database import get_all_items
-
-        items = get_all_items()
-        results = [name for _, name in items if keyword.lower() in name.lower()]
-        if results:
-            limited_results = results[:10]
+        items = search_items(keyword)
+        if items:
+            limited_results = items[:8]  # Batasi hasil menjadi 8 item
+            result_text = "\n".join([f"• {name}" for _, name in limited_results])
+            
+            more_text = ""
+            if len(items) > 8:
+                more_text = f"\n... dan {len(items) - 8} item lainnya"
+                
             await ctx.send(
-                f"🔍 Ditemukan {len(results)} item (menampilkan 10 pertama):\n"
-                + "\n".join(limited_results)
+                f"🔍 Ditemukan **{len(items)}** item untuk '{keyword}':\n"
+                f"{result_text}{more_text}"
             )
         else:
             await ctx.send(f"❌ Tidak ada item yang cocok dengan '{keyword}'")
     except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
+        await ctx.send(f"❌ Error: {str(e)}")
 
+# Command info item lengkap
+@bot.command(name="iteminfo")
+async def iteminfo(ctx, *, item_name: str):
+    try:
+        item_details = get_item_details(item_name)
+        if item_details:
+            tier_info = f"Tier {item_details['tier']}" if item_details.get('tier') else "Tier tidak diketahui"
+            
+            embed = discord.Embed(
+                title=f"🔍 {item_details['name']}",
+                description=f"**{tier_info}**\n🆔 ID: {item_details['id']}",
+                color=discord.Color.blue()
+            )
+            
+            embed.add_field(
+                name="📋 Recipe",
+                value=item_details['recipe'] if item_details['recipe'] else "Tidak ada recipe",
+                inline=False
+            )
+            
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(f"❌ Tidak ditemukan informasi untuk **{item_name}**")
+    except Exception as e:
+        await ctx.send(f"❌ Error: {str(e)}")
+
+# Command help
+@bot.command(name="help")
+async def help_command(ctx):
+    embed = discord.Embed(
+        title="📖 Growtopia Recipe Bot Help",
+        description="Berikut adalah daftar command yang tersedia:",
+        color=discord.Color.green()
+    )
+    
+    embed.add_field(
+        name="🔍 Pencarian Item",
+        value="• `?recipe [nama_item]` - Cari recipe item\n• `?search [keyword]` - Cari item berdasarkan keyword\n• `?iteminfo [nama_item]` - Info lengkap tentang item",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="💡 Tips",
+        value="• Gunakan huruf besar/kecil bebas, bot akan tetap memahami\n• Bot mendukung pencarian partial (sebagian nama item)",
+        inline=False
+    )
+    
+    embed.set_footer(text="Bot Growtopia Recipe • https://github.com/your-repo")
+    
+    await ctx.send(embed=embed)
 
 # Error handler
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(
-            "❌ Command tidak ditemukan. Gunakan `?recipe [nama_item]` atau `?search [keyword]`"
+            "❌ Command tidak ditemukan. Gunakan `?help` untuk melihat daftar command yang tersedia."
         )
     else:
         await ctx.send(f"❌ Terjadi error: {error}")
-
 
 # Jalankan bot
 if __name__ == "__main__":
