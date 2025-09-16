@@ -13,7 +13,13 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="?", intents=intents)
+
+# Nonaktifkan help command bawaan agar bisa menggunakan custom help
+bot = commands.Bot(
+    command_prefix="?", 
+    intents=intents,
+    help_command=None
+)
 
 def run_item_parser_periodically():
     """Jalankan item_parser.py secara periodic setiap 24 jam"""
@@ -164,7 +170,7 @@ async def iteminfo(ctx, *, item_name: str):
     except Exception as e:
         await ctx.send(f"❌ Error: {str(e)}")
 
-# Command help
+# Command help - TIDAK ERROR LAGI
 @bot.command(name="help")
 async def help_command(ctx):
     embed = discord.Embed(
