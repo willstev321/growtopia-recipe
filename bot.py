@@ -31,22 +31,41 @@ async def check_items_update():
 # Command lihat recipe
 @bot.command(name="recipe")
 async def recipe(ctx, *, item_name: str):
-    recipe_text = get_recipe(item_name)
-    if recipe_text:
-        await ctx.send(f"📦 Recipe untuk **{item_name}**:\n{recipe_text}")
-    else:
-        await ctx.send(f"❌ Tidak ada recipe untuk {item_name}")
+    try:
+        recipe_text = get_recipe(item_name)
+        if recipe_text:
+            await ctx.send(f"📦 Recipe untuk **{item_name}**:\n{recipe_text}")
+        else:
+            # Coba dengan format yang berbeda (title case)
+            item_name_title = item_name.title()
+            recipe_text = get_recipe(item_name_title)
+            if recipe_text:
+                await ctx.send(f"📦 Recipe untuk **{item_name_title}**:\n{recipe_text}")
+            else:
+                await ctx.send(f"❌ Tidak ada recipe untuk '{item_name}'")
+    except Exception as e:
+        await ctx.send(f"❌ Error: {e}")
 
 # Command cari item
 @bot.command(name="search")
 async def search(ctx, *, keyword: str):
-    from database import get_all_items
-    items = get_all_items()
-    results = [name for _, name in items if keyword.lower() in name.lower()]
-    if results:
-        await ctx.send(f"🔍 Item ditemukan:\n" + "\n".join(results))
-    else:
-        await ctx.send(f"❌ Tidak ada item yang cocok dengan '{keyword}'")
+    try:
+        from database import get_all_items
+        
+        items = get_all_items()
+        # Gunakan lower() untuk pencarian case-insensitive
+        results = [name for _, name in items if keyword.lower() in name.lower()]
+        
+        if results:
+            limited_results = results[:10]  # Batasi hasil
+            await ctx.send(
+                f"🔍 Ditemukan {len(results)} item (menampilkan 10 pertama):\n" +
+                "\n".join(limited_results)
+            )
+        else:
+            await ctx.send(f"❌ Tidak ada item yang cocok dengan '{keyword}'")
+    except Exception as e:
+        await ctx.send(f"❌ Error: {e}")
 
 # Jalankan bot
 token = os.getenv("DISCORD_BOT_TOKEN")
@@ -56,3 +75,4 @@ if not token:
     exit(1)
 
 bot.run(token)
+
