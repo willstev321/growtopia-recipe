@@ -5,8 +5,9 @@ import threading
 import subprocess
 import time
 from dotenv import load_dotenv
-from database import init_db, get_recipe, get_all_items, get_item_details, search_items
+from database import init_db, get_recipe, get_all_items, get_item_details, search_items, get_item_image_url
 from items_parser import fetch_and_parse_items, load_all_items
+
 
 # Load environment variables dari file .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -374,3 +375,4 @@ if __name__ == "__main__":
 
     print("🚀 Starting bot...")
     bot.run(token)
+
