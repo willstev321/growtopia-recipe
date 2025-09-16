@@ -1,16 +1,16 @@
 [
-  {
-    "id": 1,
-    "name": "Door",
-    "tier": 2,
-    "recipe": "Dirt + Cave Background",
-  },
-  {
-    "id": 2,
-    "name": "Grass",
-    "tier": 2,
-    "recipe": "Dirt + Rock",
-  },
+{
+"id": 1,
+"name": "Door",
+"tier": 2,
+"recipe": "Dirt + Cave Background",
+},
+{
+"id": 2,
+"name": "Grass",
+"tier": 2,
+"recipe": "Dirt + Rock",
+},
 {
 "id": 3,
 "name": "Wood Block",
@@ -2202,6 +2202,7 @@
   "recipe": "Bush + Green Block",
 }
 ]
+
 
 
 
