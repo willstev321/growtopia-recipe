@@ -32,10 +32,11 @@ def get_recipe(name):
     return result[0] if result else None
 
 def get_all_items():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("SELECT id, name FROM items")
-    items = c.fetchall()
+    """Mendapatkan semua items dari database"""
+    conn = sqlite3.connect('growtopia.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM items ORDER BY name")
+    items = cursor.fetchall()
     conn.close()
     return items
 
@@ -50,3 +51,54 @@ def get_recipe(item_name):
     
     conn.close()
     return result[0] if result else None
+
+def normalize_item_names():
+    conn = sqlite3.connect('growtopia.db')
+    cursor = conn.cursor()
+    
+    # Ambil semua item
+    cursor.execute("SELECT id, name FROM items")
+    items = cursor.fetchall()
+    
+    # Update nama menjadi Title Case untuk konsistensi
+    for item_id, item_name in items:
+        normalized_name = item_name.title()
+        if normalized_name != item_name:
+            cursor.execute("UPDATE items SET name = ? WHERE id = ?", 
+                          (normalized_name, item_id))
+            print(f"Updated: {item_name} -> {normalized_name}")
+    
+    conn.commit()
+    conn.close()
+    print("Database normalized successfully!")
+
+def get_recipe_robust(item_name):
+    """Pencarian yang lebih robust dengan multiple attempts"""
+    conn = sqlite3.connect('growtopia.db')
+    cursor = conn.cursor()
+    
+    # Coba beberapa format pencarian
+    attempts = [
+        item_name,                  # Format asli
+        item_name.title(),          # Title Case
+        item_name.upper(),          # UPPERCASE
+        item_name.lower(),          # lowercase
+    ]
+    
+    for attempt in attempts:
+        cursor.execute("SELECT recipe FROM items WHERE name = ?", (attempt,))
+        result = cursor.fetchone()
+        if result:
+            conn.close()
+            return result[0]
+    
+    # Jika masih tidak ketemu, coba dengan LIKE (partial match)
+    cursor.execute("SELECT recipe FROM items WHERE name LIKE ?", (f"%{item_name}%",))
+    result = cursor.fetchone()
+    
+    conn.close()
+    return result[0] if result else None
+
+if __name__ == "__main__":
+    normalize_item_names()
+
