@@ -1,142 +1,132 @@
 import sqlite3
+import json
 import os
 
-DB_FILE = "growtopia_items.db"
-
 def init_db():
-    """Inisialisasi database dan buat tabel jika belum ada"""
-    conn = sqlite3.connect(DB_FILE)
+    """Inisialisasi database dengan tabel items"""
+    conn = sqlite3.connect('items.db')
     c = conn.cursor()
     
-    # Buat tabel items
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS items (
-        id INTEGER PRIMARY KEY,
-        name TEXT UNIQUE,
-        tier INTEGER,
-        recipe TEXT
-    )
-    """)
-    
-    # Verifikasi tabel berhasil dibuat
-    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='items'")
-    result = c.fetchone()
+    # Buat tabel jika belum ada
+    c.execute('''CREATE TABLE IF NOT EXISTS items
+                 (id INTEGER PRIMARY KEY, 
+                  name TEXT, 
+                  tier INTEGER,
+                  recipe TEXT,
+                  image_url TEXT)''')
     
     conn.commit()
     conn.close()
-    
-    if result:
-        print(f"✅ Tabel 'items' berhasil dibuat/ditemukan di {DB_FILE}")
-        return True
-    else:
-        print(f"❌ Gagal membuat tabel 'items' di {DB_FILE}")
-        return False
 
-def save_item(item_id, name, tier, recipe):
-    """Menyimpan item ke database"""
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
+def load_all_items():
+    """Load semua items dari items.json ke database"""
     try:
-        c.execute("INSERT OR REPLACE INTO items (id, name, tier, recipe) VALUES (?, ?, ?, ?)", 
-                 (item_id, name, tier, recipe))
+        with open('items.json', 'r', encoding='utf-8') as f:
+            items = json.load(f)
+        
+        conn = sqlite3.connect('items.db')
+        c = conn.cursor()
+        
+        # Kosongkan tabel sebelum mengisi ulang
+        c.execute("DELETE FROM items")
+        
+        # Masukkan items ke database
+        for item in items:
+            c.execute("INSERT INTO items (id, name, tier, recipe, image_url) VALUES (?, ?, ?, ?, ?)",
+                     (item['id'], item['name'], item.get('tier', 0), item.get('recipe', ''), item.get('image_url', '')))
+        
         conn.commit()
-        return True
-    except sqlite3.Error as e:
-        print(f"❌ Error saving item {name}: {e}")
-        return False
-    finally:
         conn.close()
+        print(f"✅ {len(items)} items berhasil dimuat ke database")
+    except Exception as e:
+        print(f"❌ Error loading items: {e}")
 
 def get_recipe(item_name):
-    """Mendapatkan recipe untuk item tertentu (case-insensitive)"""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    """Dapatkan recipe untuk item tertentu"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
     
-    try:
-        # Coba pencarian case-insensitive dengan LIKE
-        cursor.execute("SELECT recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
-        result = cursor.fetchone()
-        
-        if not result:
-            # Coba partial match jika exact match tidak ditemukan
-            cursor.execute("SELECT recipe FROM items WHERE LOWER(name) LIKE LOWER(?)", (f"%{item_name}%",))
-            result = cursor.fetchone()
-        
-        return result[0] if result else None
-    except sqlite3.Error as e:
-        print(f"❌ Error getting recipe for {item_name}: {e}")
-        return None
-    finally:
-        conn.close()
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT recipe FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    return result[0] if result else None
+
+def get_item_details(item_name):
+    """Dapatkan detail lengkap item termasuk image_url"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT id, name, tier, recipe, image_url FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    
+    if result:
+        return {
+            'id': result[0],
+            'name': result[1],
+            'tier': result[2],
+            'recipe': result[3],
+            'image_url': result[4]
+        }
+    return None
 
 def get_all_items():
-    """Mendapatkan semua items dari database"""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    """Dapatkan semua items dari database"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
     
-    try:
-        cursor.execute("SELECT id, name FROM items ORDER BY name")
-        items = cursor.fetchall()
-        return items
-    except sqlite3.Error as e:
-        print(f"❌ Error getting all items: {e}")
-        return []
-    finally:
-        conn.close()
-
-def normalize_item_names():
-    """Normalisasi nama item ke Title Case"""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    c.execute("SELECT id, name FROM items")
+    items = c.fetchall()
     
-    try:
-        # Ambil semua item
-        cursor.execute("SELECT id, name FROM items")
-        items = cursor.fetchall()
-        
-        updated_count = 0
-        for item_id, item_name in items:
-            normalized_name = item_name.title()
-            if normalized_name != item_name:
-                cursor.execute("UPDATE items SET name = ? WHERE id = ?", 
-                             (normalized_name, item_id))
-                print(f"Updated: {item_name} -> {normalized_name}")
-                updated_count += 1
-        
-        conn.commit()
-        print(f"✅ Database normalized successfully! {updated_count} items updated.")
-        return updated_count
-    except sqlite3.Error as e:
-        print(f"❌ Error normalizing database: {e}")
-        return 0
-    finally:
-        conn.close()
+    conn.close()
+    return items
 
-def check_database():
-    """Memeriksa status database"""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+def search_items(keyword):
+    """Cari items berdasarkan keyword"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
     
-    try:
-        # Periksa tabel yang ada
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = [table[0] for table in cursor.fetchall()]
-        print(f"📊 Tabel dalam database: {tables}")
-        
-        # Periksa jumlah item
-        cursor.execute("SELECT COUNT(*) FROM items")
-        count = cursor.fetchone()[0]
-        print(f"📦 Jumlah item dalam database: {count}")
-        
-        return True, count
-    except sqlite3.Error as e:
-        print(f"❌ Error checking database: {e}")
-        return False, 0
-    finally:
-        conn.close()
+    # Cari item dengan nama yang mengandung keyword (case-insensitive)
+    c.execute("SELECT id, name FROM items WHERE LOWER(name) LIKE LOWER(?)", ('%' + keyword + '%',))
+    items = c.fetchall()
+    
+    conn.close()
+    return items
 
-if __name__ == "__main__":
-    # Inisialisasi database terlebih dahulu
-    if init_db():
-        normalize_item_names()
-        check_database()
+def get_item_image_url(item_name):
+    """Dapatkan URL gambar untuk item tertentu"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cari item dengan nama yang cocok (case-insensitive)
+    c.execute("SELECT image_url FROM items WHERE LOWER(name) = LOWER(?)", (item_name,))
+    result = c.fetchone()
+    
+    conn.close()
+    return result[0] if result else None
+
+# Tambahkan fungsi save_item yang diperlukan oleh items_parser.py
+def save_item(item_id, name, tier, recipe, image_url=None):
+    """Simpan atau update item ke database"""
+    conn = sqlite3.connect('items.db')
+    c = conn.cursor()
+    
+    # Cek apakah item sudah ada
+    c.execute("SELECT id FROM items WHERE id = ?", (item_id,))
+    exists = c.fetchone()
+    
+    if exists:
+        # Update item yang sudah ada
+        c.execute("UPDATE items SET name = ?, tier = ?, recipe = ?, image_url = ? WHERE id = ?",
+                 (name, tier, recipe, image_url, item_id))
+    else:
+        # Insert item baru
+        c.execute("INSERT INTO items (id, name, tier, recipe, image_url) VALUES (?, ?, ?, ?, ?)",
+                 (item_id, name, tier, recipe, image_url))
+    
+    conn.commit()
+    conn.close()
