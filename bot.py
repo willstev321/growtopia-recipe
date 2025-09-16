@@ -16,7 +16,7 @@ intents.message_content = True
 
 # Nonaktifkan help command bawaan agar bisa menggunakan custom help
 bot = commands.Bot(
-    command_prefix="?", 
+    command_prefix="*",  # DIUBAH: gunakan * sebagai prefix
     intents=intents,
     help_command=None
 )
@@ -170,7 +170,7 @@ async def iteminfo(ctx, *, item_name: str):
     except Exception as e:
         await ctx.send(f"❌ Error: {str(e)}")
 
-# Command help - TIDAK ERROR LAGI
+# Command help
 @bot.command(name="help")
 async def help_command(ctx):
     embed = discord.Embed(
@@ -181,7 +181,7 @@ async def help_command(ctx):
     
     embed.add_field(
         name="🔍 Pencarian Item",
-        value="• `?recipe [nama_item]` - Cari recipe item\n• `?search [keyword]` - Cari item berdasarkan keyword\n• `?iteminfo [nama_item]` - Info lengkap tentang item",
+        value="• `*recipe [nama_item]` - Cari recipe item\n• `*search [keyword]` - Cari item berdasarkan keyword\n• `*iteminfo [nama_item]` - Info lengkap tentang item",  # DIUBAH: * sebagai prefix
         inline=False
     )
     
@@ -200,7 +200,7 @@ async def help_command(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(
-            "❌ Command tidak ditemukan. Gunakan `?help` untuk melihat daftar command yang tersedia."
+            "❌ Command tidak ditemukan. Gunakan `*help` untuk melihat daftar command yang tersedia."  # DIUBAH: * sebagai prefix
         )
     else:
         await ctx.send(f"❌ Terjadi error: {error}")
