@@ -5,8 +5,8 @@ import threading
 import subprocess
 import time
 from dotenv import load_dotenv
-from database import init_db, get_recipe, get_all_items, get_item_details, search_items
-from items_parser import fetch_and_parse_items, load_all_items
+from database import init_db, get_recipe, get_all_items, get_item_details, search_items, get_item_image_url, update_db_schema
+from items_parser import fetch_and_parse_items, load_all_items, validate_json
 
 # Load environment variables dari file .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -35,20 +35,24 @@ def get_channel_mention(channel_id):
     return f"<#{channel_id}>"
 
 def run_item_parser_periodically():
-    """Jalankan item_parser.py secara periodic setiap 24 jam"""
+    """Jalankan items_parser.py secara periodic setiap 24 jam"""
     while True:
         try:
-            print("🔄 Menjalankan item_parser.py...")
-            # Gunakan subprocess untuk menjalankan script terpisah
-            result = subprocess.run(["python", "items_parser.py"], 
-                                  capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                print("✅ items_parser.py berhasil dijalankan")
-                if result.stdout:
-                    print(f"Output: {result.stdout}")
+            print("🔄 Menjalankan items_parser.py...")
+            # Validasi JSON terlebih dahulu
+            if validate_json("items.json"):
+                # Gunakan subprocess untuk menjalankan script terpisah
+                result = subprocess.run(["python", "items_parser.py"], 
+                                      capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print("✅ items_parser.py berhasil dijalankan")
+                    if result.stdout:
+                        print(f"Output: {result.stdout}")
+                else:
+                    print(f"❌ Error menjalankan items_parser.py: {result.stderr}")
             else:
-                print(f"❌ Error menjalankan items_parser.py: {result.stderr}")
+                print("❌ items.json tidak valid, skip parsing")
                 
         except Exception as e:
             print(f"❌ Exception dalam run_item_parser_periodically: {e}")
@@ -62,6 +66,7 @@ def initialize_database():
         print("🔄 Menginisialisasi database...")
         # Inisialisasi DB
         init_db()
+        update_db_schema()
         
         # Load items ke database jika belum ada
         if len(get_all_items()) == 0:
@@ -134,6 +139,10 @@ async def check_items_update():
                                 color=discord.Color.gold()
                             )
                             
+                            # Tambahkan gambar jika ada
+                            if item.get('image_url'):
+                                embed.set_thumbnail(url=item['image_url'])
+                            
                             embed.add_field(
                                 name="📊 Detail Item",
                                 value=f"**Tier:** {item.get('tier', 'N/A')}\n"
@@ -164,6 +173,10 @@ async def recipe(ctx, *, item_name: str):
                     description=f"**Tier:** {item_details.get('tier', 'N/A')} | **ID:** {item_details['id']}",
                     color=discord.Color.green()
                 )
+                
+                # Tambahkan gambar jika ada
+                if item_details.get('image_url'):
+                    embed.set_thumbnail(url=item_details['image_url'])
                 
                 embed.add_field(
                     name="📋 **seeds recipe**",
@@ -271,6 +284,10 @@ async def iteminfo(ctx, *, item_name: str):
                 description=f"**{tier_info}**\n🆔 ID: {item_details['id']}",
                 color=discord.Color.blue()
             )
+            
+            # Tambahkan gambar jika ada
+            if item_details.get('image_url'):
+                embed.set_thumbnail(url=item_details['image_url'])
             
             embed.add_field(
                 name="📋 Recipe",
