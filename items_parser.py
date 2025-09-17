@@ -29,9 +29,10 @@ def fetch_and_parse_items():
             name = item["name"]
             tier = item.get("tier", 0)
             recipe = item.get("recipe", "Tidak ada recipe")
+            image_url = item.get("image_url")  # Ambil URL gambar
             
             # Simpan item ke database
-            save_item(item_id, name, tier, recipe)
+            save_item(item_id, name, tier, recipe, image_url)
             
             # Cek jika item baru
             if name.lower() not in existing_items:
@@ -39,7 +40,8 @@ def fetch_and_parse_items():
                     "id": item_id,
                     "name": name,
                     "tier": tier,
-                    "recipe": recipe
+                    "recipe": recipe,
+                    "image_url": image_url
                 })
         except KeyError as e:
             print(f"❌ Error processing item: Missing key {e} in item {item}")
@@ -69,8 +71,9 @@ def load_all_items():
             name = item["name"]
             tier = item.get("tier", 0)
             recipe = item.get("recipe", "Tidak ada recipe")
+            image_url = item.get("image_url")  # Ambil URL gambar
             
-            if save_item(item_id, name, tier, recipe):
+            if save_item(item_id, name, tier, recipe, image_url):
                 success_count += 1
         except Exception as e:
             print(f"❌ Error saving item {item.get('name', 'unknown')}: {e}")
@@ -78,8 +81,21 @@ def load_all_items():
     print(f"✅ Successfully loaded {success_count} items to database")
     return success_count > 0
 
+def validate_json(file_path):
+    """Validasi file JSON"""
+    try:
+        with open(file_path, 'r') as f:
+            json.load(f)
+        print("✅ JSON valid")
+        return True
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON invalid: {e}")
+        return False
+
 if __name__ == "__main__":
     # Jalankan ini untuk memuat semua item ke database
-    from database import init_db
+    from database import init_db, update_db_schema
     init_db()
+    update_db_schema()
+    validate_json(ITEMS_FILE)
     load_all_items()
